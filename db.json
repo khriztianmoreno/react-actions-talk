@@ -21,19 +21,9 @@
       "id": 4
     },
     {
-      "name": "talk",
+      "name": "Handle errors",
       "isComplete": false,
-      "id": 7
-    },
-    {
-      "name": "dance",
-      "isComplete": false,
-      "id": 8
-    },
-    {
-      "name": "meeting",
-      "isComplete": true,
-      "id": 9
+      "id": 5
     }
   ]
 }
