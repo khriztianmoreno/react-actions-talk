@@ -27,7 +27,7 @@ $ npm i -S redux-actions
 ```
 ### Refactor a Redux Action Creator using the createAction function from redux-actions
 
-En esta lección, tomaremos uno de los creadores de acciones existentes y lo reemplazaremos usando la función createAction proporcionada por redux-actions. El uso de createAction reduce algunos de los problemas y, lo que es más importante, garantiza que nuestras Acciones se adhieran a la estructura FSA (Flux Standard Action).
+En esta punto, tomaremos uno de los creadores de acciones existentes y lo reemplazaremos usando la función createAction proporcionada por redux-actions. El uso de createAction reduce algunos de los problemas y, lo que es más importante, garantiza que nuestras Acciones se adhieran a la estructura FSA (Flux Standard Action).
 
 Comenzaremos con el archivo `/store/actions/index` en la parte superior del archivo e importemos la función `createAction` desde `redux-actions`.
 
@@ -76,6 +76,31 @@ export const replaceTodo = createAction(REPLACE_TODO)
 export const removeTodo = createAction(REMOVE_TODO)
 export const showLoader = () => ({ type: SHOW_LOADER, payload: true })
 export const hideLoader = () => ({ type: HIDE_LOADER, payload: false })
+```
+
+### Modify a Redux Action’s Payload upon Creation with redux-actions
+
+Ahora, usaremos el argumento opcional *payloadCreator* de la función `createAction` para para transformar la entrada de datos sin procesar para que estén correctamente formateados para nuestra aplicación.
+
+Cuando pasamos nuestro tipo de acción a `createAction`, el comportamiento predeterminado es devolver una función que va a aceptar nuestro valor y hacer que el `payload` este en el objeto de acción resultante. Afortunadamente, `createAction` nos da un segundo argumento, que es una función creadora de `payload`.
+
+```js
+// export const showLoader = () => ({ type: SHOW_LOADER, payload: true })
+// export const hideLoader = () => ({ type: HIDE_LOADER, payload: false })
+export const showLoader = createAction(SHOW_LOADER, () => true)
+export const hideLoader = createAction(HIDE_LOADER, () => false)
+```
+
+Entonces para mi segundo argumento, puedo darle una función a esto. Ese valor que se devuelve se utilizará como un `payload`. En este caso, solo le daré una función que no toma argumentos y devuelve true/false. 
+
+De forma predeterminada, cualquier argumento que se pase a nuestro `action creator` se pasará a esta función como un argumento. Digamos que quiero actualizar el texto a medida que se escribe y asegurarnos de que la acción que se realiza en el `reducer` refleje los cambios en ese texto actualizado.
+
+Por ejemplo:
+
+```js
+const fixCase = str => `${str.slice(0, 1).toUpperCase()}${str.slice(1).toLowerCase()}`
+
+export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
 ```
 
 

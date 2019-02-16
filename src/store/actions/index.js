@@ -1,6 +1,7 @@
 /**
  * @author Cristian Moreno <khriztianmoreno@gmail.com>
  */
+import { createAction } from 'redux-actions'
 
 import {
   getTodos,
@@ -19,13 +20,15 @@ import {
   HIDE_LOADER,
 } from '../types'
 
-export const updateCurrent = val => ({ type: UPDATE_CURRENT, payload: val })
-export const loadTodos = todos => ({ type: LOAD_TODOS, payload: todos })
-export const addTodo = todo => ({ type: ADD_TODO, payload: todo })
-export const replaceTodo = todo => ({ type: REPLACE_TODO, payload: todo })
-export const removeTodo = id => ({ type: REMOVE_TODO, payload: id })
-export const showLoader = () => ({ type: SHOW_LOADER, payload: true })
-export const hideLoader = () => ({ type: HIDE_LOADER, payload: false })
+const fixCase = str => `${str.slice(0, 1).toUpperCase()}${str.slice(1).toLowerCase()}`
+
+export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
+export const loadTodos = createAction(LOAD_TODOS)
+export const addTodo = createAction(ADD_TODO)
+export const replaceTodo = createAction(REPLACE_TODO)
+export const removeTodo = createAction(REMOVE_TODO)
+export const showLoader = createAction(SHOW_LOADER, () => true)
+export const hideLoader = createAction(HIDE_LOADER, () => false)
 
 export const fetchTodos = () => (dispatch) => {
   dispatch(showLoader())
