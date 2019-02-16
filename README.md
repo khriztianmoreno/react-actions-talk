@@ -218,6 +218,64 @@ export const {
 )
 ```
 
+### Create a Reducer Function for a Specific Redux Action using redux-actions
+
+Ahora usaremos la función `handleAction` proporcionada por `redux-actions` para crear una función reductora que manejará una acción específica. Luego, incorporaremos esta función reductora en el *reducer* existente y nos aseguraremos de que nuestra aplicación continúe funcionando.
+
+```js
+import { handleAction } from 'redux-actions'
+```
+
+Voy a utilizar `handleAction` para crear un *reducer* para una de nuestras acciones. Voy a empezar y voy a declarar el `addToDoReducer`. Esto va a ser una llamada para manejar la acción pasando como primer parametro el tipo de acción **ADD_TODO**. Mi segundo argumento será una función reductora que quiero manejar para esta acción. Ella va a recibir el estado y una acción, al igual que lo hace nuestro *reducer*. En esa función, quiero devolver a la actualización el estado en función de la acción. Al igual que nuestro reductor principal, debe incluirse en el estado de inicio. Eso va a ser pasado como el tercer argumento. 
+
+```js
+const addTodoReducer = handleAction(
+  [ADD_TODO],
+  (state, action) => {
+    return {
+      ...state,
+      currentTodo: '',
+      todos: state.todos.concat(action.payload)
+    }
+  },
+  initState
+)
+```
+`handleAction` toma un tipo de acción, toma una función reductora y toma un estado inicial.
+
+Ahora solo nos falta cambiar la logica de nuestro *reducer* principal para tener esta nueva función incluida.
+
+```js
+export default (state = initState, action) => {
+  switch (action.type) {
+    case ADD_TODO:
+      return addTodoReducer(state, action)
+    case LOAD_TODOS:
+      return { ...state, todos: action.payload }
+    case UPDATE_CURRENT:
+      return { ...state, currentTodo: action.payload }
+    case REPLACE_TODO:
+      return {
+        ...state,
+        todos: state.todos.map(t => (t.id === action.payload.id ? action.payload : t)),
+      }
+    case REMOVE_TODO:
+      return {
+        ...state,
+        todos: state.todos.filter(t => t.id !== action.payload),
+      }
+    case SHOW_LOADER:
+    case HIDE_LOADER:
+      return { ...state, isLoading: action.payload }
+    default:
+      return state
+  }
+}
+```
+
+Todo lo que hemos hecho aquí es tomar nuestra lógica del reductor y sacarlo de nuestra declaración de *case* del *switch* para limpiar nuestro código un poco. Todo sigue funcionando igual. Podemos verificar que al guardar esto todo sigue funcionando como se esperaba.
+
+
 
 ### `npm start`
 
