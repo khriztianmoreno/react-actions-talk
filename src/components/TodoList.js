@@ -43,6 +43,7 @@ class TodoList extends Component {
 
   render() {
     const { todos = [], onToggleTodo, onDeleteTodo } = this.props
+    console.log(todos)
     return (
       <div className="Todo-List">
         <ul>
@@ -73,6 +74,10 @@ TodoItem.propTypes = {
   onDeleteTodo: PropTypes.func.isRequired,
 }
 
+TodoList.defaultProps = {
+  todos: {},
+}
+
 /**
  * Typechecking props
  */
@@ -81,7 +86,7 @@ TodoList.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string,
     isComplete: PropTypes.bool,
-  }).isRequired,
+  }),
   getTodos: PropTypes.func.isRequired,
   onToggleTodo: PropTypes.func.isRequired,
   onDeleteTodo: PropTypes.func.isRequired,
