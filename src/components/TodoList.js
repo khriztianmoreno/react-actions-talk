@@ -43,7 +43,7 @@ class TodoList extends Component {
 
   render() {
     const { todos = [], onToggleTodo, onDeleteTodo } = this.props
-    console.log(todos)
+    
     return (
       <div className="Todo-List">
         <ul>

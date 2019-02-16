@@ -275,7 +275,131 @@ export default (state = initState, action) => {
 
 Todo lo que hemos hecho aquí es tomar nuestra lógica del reductor y sacarlo de nuestra declaración de *case* del *switch* para limpiar nuestro código un poco. Todo sigue funcionando igual. Podemos verificar que al guardar esto todo sigue funcionando como se esperaba.
 
+### Combine Individual Reducer Functions into a Single Reducer with reduce-reducers
 
+Ahora, agregaremos la biblioteca de `reduce-reducers` a nuestro proyecto y la utilizaremos junto con la función `handleAction` de `redux-actions` para definir funciones de reductoras separadas para cada acción y reducirlas a una única función con `reduce-reducers`.
+
+Idealmente, nos gustaría poder deshacernos de ese *switch* y crear reductores individuales para cada acción. Comencemos agregando la biblioteca de  `reduce-reducers` a nuestro proyecto. 
+
+```bash
+$ npm i -S reduce-reducers
+```
+
+Con eso instalado, importémoslo a nuestro archivo `/store/reducers/index.js`. En la parte superior.
+
+```js
+import reduceReducers from 'reduce-reducers'
+```
+
+Ahora que hemos importado esto, vayamos a nuestro *reducer* principal y hagamos un poco de refactor.
+
+```js
+const mainReducer = (state = initState, action) => {
+  switch (action.type) {
+    case LOAD_TODOS:
+      return { ...state, todos: action.payload }
+    case UPDATE_CURRENT:
+      return { ...state, currentTodo: action.payload }
+    case REPLACE_TODO:
+      return {
+        ...state,
+        todos: state.todos.map(t => (t.id === action.payload.id ? action.payload : t)),
+      }
+    case REMOVE_TODO:
+      return {
+        ...state,
+        todos: state.todos.filter(t => t.id !== action.payload),
+      }
+    case SHOW_LOADER:
+    case HIDE_LOADER:
+      return { ...state, isLoading: action.payload }
+    default:
+      return state
+  }
+}
+```
+
+Le dí un nombre a esto, `mainReducer`. Como ya tenemos un *reducer* para **ADD_TODO**, lo eliminaré de la instrucción switch y vamos a manejar los que no tienen reductores individuales en este **mainReducer**.
+
+Ahora voy a reemplazar la exportación predeterminada. Esto va a ser una llamada para reducir los *Reducers*, pasando a nuestro `mainReducer` y nuestro `addTodoReductor`.
+
+```js
+export default reduceReducers(mainReducer, addTodoReducer)
+```
+
+Todo debería seguir funcionando como antes y ahora tenemos un reductor que encapsula ambas funciones del *reducer*. Esto significa que, en lugar de crear estos reductores individuales y tener que encajarlos en la antigua declaración de *switch/case*, podemos crear un grupo de reductores individuales, reducirlos y devolverlos como una sola función de reductora.
+
+Luego de cambiar todo a acciones individuales tenderemos un codigo como este:
+
+```js
+const addTodoReducer = handleAction(
+  [ADD_TODO],
+  (state, action) => (
+    {
+      ...state,
+      currentTodo: '',
+      todos: state.todos.concat(action.payload),
+    }
+  ),
+  initState,
+)
+
+const loadTodosReducer = handleAction(
+  [LOAD_TODOS],
+  (state, action) => ({ ...state, todos: action.payload }),
+  initState,
+)
+
+const updateCurrentReducer = handleAction(
+  [UPDATE_CURRENT],
+  (state, action) => ({ ...state, currentTodo: action.payload }),
+  initState,
+)
+
+const replaceTodoReducer = handleAction(
+  [REPLACE_TODO],
+  (state, action) => (
+    {
+      ...state,
+      todos: state.todos.map(t => (t.id === action.payload.id ? action.payload : t)),
+    }
+  ),
+  initState,
+)
+
+const removeTodoReducer = handleAction(
+  [REMOVE_TODO],
+  (state, action) => (
+    {
+      ...state,
+      todos: state.todos.filter(t => t.id !== action.payload)
+    }
+  ),
+  initState,
+)
+
+const showLoaderReducer = handleAction(
+  [SHOW_LOADER],
+  (state, action) => ({ ...state, isLoading: action.payload }),
+  initState,
+)
+
+const hideLoaderReducer = handleAction(
+  [HIDE_LOADER],
+  (state, action) => ({ ...state, isLoading: action.payload }),
+  initState,
+)
+
+export default reduceReducers(
+  addTodoReducer,
+  loadTodosReducer,
+  updateCurrentReducer,
+  replaceTodoReducer,
+  removeTodoReducer,
+  showLoaderReducer,
+  hideLoaderReducer,
+)
+```
 
 ### `npm start`
 
