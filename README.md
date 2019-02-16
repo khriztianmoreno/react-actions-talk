@@ -27,7 +27,7 @@ $ npm i -S redux-actions
 ```
 ### Refactor a Redux Action Creator using the createAction function from redux-actions
 
-En esta punto, tomaremos uno de los creadores de acciones existentes y lo reemplazaremos usando la función createAction proporcionada por redux-actions. El uso de createAction reduce algunos de los problemas y, lo que es más importante, garantiza que nuestras Acciones se adhieran a la estructura FSA (Flux Standard Action).
+En esta punto, tomaremos uno de los `action creator` existentes y lo reemplazaremos usando la función createAction proporcionada por redux-actions. El uso de createAction reduce algunos de los problemas y, lo que es más importante, garantiza que nuestras Acciones se adhieran a la estructura FSA (Flux Standard Action).
 
 Comenzaremos con el archivo `/store/actions/index` en la parte superior del archivo e importemos la función `createAction` desde `redux-actions`.
 
@@ -101,6 +101,121 @@ Por ejemplo:
 const fixCase = str => `${str.slice(0, 1).toUpperCase()}${str.slice(1).toLowerCase()}`
 
 export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
+```
+
+### Create Multiple Redux Actions with an Action Map in redux-actions
+
+En este paso, usaremos la función plural `createActions` y un mapa de acción para crear múltiples `action creator` con una sola utilidad a partir de redux actions.
+
+Con lo que llevamos hasta ahora nuestros `action creator` son mucho más simples de lo que teníamos antes, donde ya no tenemos que definir cada objeto individual con un `payload`. Sin embargo, podemos simplificar esto aún más.
+
+En nuestra importación, vamos a cambiar nuestra `import` de `createAction` a `createActions` en plural. Esto nos dará una función que creará múltiples `action creator` para nosotros.
+
+```js
+import { createActions } from 'redux-actions'
+```
+
+Agregaré una llamada a `createActions` y crearé acciones, tomará un objeto como su primer argumento y este objeto es un mapa de acciónes. En el mapa de acción, voy a usar mis tipos de acción como claves.
+
+```js
+createActions(
+  {
+  UPDATE_CURRENT: fixCase,
+  SHOW_LOADER: () => true,
+  HIDE_LOADER: () => false
+  },
+  LOAD_TODOS,
+  ADD_TODO,
+  REPLACE_TODO,
+  REMOVE_TODO,
+)
+
+// export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
+// export const loadTodos = createAction(LOAD_TODOS)
+// export const addTodo = createAction(ADD_TODO)
+// export const replaceTodo = createAction(REPLACE_TODO)
+// export const removeTodo = createAction(REMOVE_TODO)
+// export const showLoader = createAction(SHOW_LOADER, () => true)
+// export const hideLoader = createAction(HIDE_LOADER, () => false)
+```
+
+Detrás de escena, la forma en que funciona es que nuestra función de creador de *payload* se reemplaza con una función de identidad y la función de identidad solo toma un valor y lo devuelve.
+
+Poco después de guardar esto, si observamos la aplicación recargada, veremos que todos estos `action creator` se muestran como no definidos, porque ya no los estamos exportando como antes con nuestras llamadas individuales para crear acciones.
+
+La forma en que funciona `createActions`, es devolver un objeto con todos nuestros `action creator`. Cada uno de esos *action creator* será una función con la versión en camelCase de la *key* que usamos en nuestro mapa de acción. 
+
+Por lo tanto podriamos hacer *destructing* de esta funcion para exportar nuestras acciones:
+
+```js
+const actionCreators = createActions(
+  {
+  UPDATE_CURRENT: fixCase,
+  SHOW_LOADER: () => true,
+  HIDE_LOADER: () => false,
+  },
+  LOAD_TODOS,
+  ADD_TODO,
+  REPLACE_TODO,
+  REMOVE_TODO,
+)
+
+export const {
+  updateCurrent,
+  loadTodos,
+  addTodo,
+  replaceTodo,
+  removeTodo,
+  showLoader,
+  hideLoader, 
+} = actionCreators
+```
+
+Obiamente podriamos mejorar el codigo y tener un resultado final asi:
+```js
+export const {
+  updateCurrent,
+  loadTodos,
+  addTodo,
+  replaceTodo,
+  removeTodo,
+  showLoader,
+  hideLoader,
+} = createActions(
+  {
+    UPDATE_CURRENT: fixCase,
+    SHOW_LOADER: () => true,
+    HIDE_LOADER: () => false,
+  },
+  LOAD_TODOS,
+  ADD_TODO,
+  REPLACE_TODO,
+  REMOVE_TODO,
+)
+```
+
+**NOTA**: En nuestro caso al importar los *types* es neceario usar esta sintaxis
+
+```js
+export const {
+  updateCurrent,
+  loadTodos,
+  addTodo,
+  replaceTodo,
+  removeTodo,
+  showLoader,
+  hideLoader,
+} = createActions(
+  {
+    [UPDATE_CURRENT]: fixCase,
+    [SHOW_LOADER]: () => true,
+    [HIDE_LOADER]: () => false,
+  },
+  [LOAD_TODOS].toString(),
+  [ADD_TODO].toString(),
+  [REPLACE_TODO].toString(),
+  [REMOVE_TODO].toString(),
+)
 ```
 
 

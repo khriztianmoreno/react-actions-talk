@@ -1,7 +1,7 @@
 /**
  * @author Cristian Moreno <khriztianmoreno@gmail.com>
  */
-import { createAction } from 'redux-actions'
+import { createActions } from 'redux-actions'
 
 import {
   getTodos,
@@ -22,13 +22,25 @@ import {
 
 const fixCase = str => `${str.slice(0, 1).toUpperCase()}${str.slice(1).toLowerCase()}`
 
-export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
-export const loadTodos = createAction(LOAD_TODOS)
-export const addTodo = createAction(ADD_TODO)
-export const replaceTodo = createAction(REPLACE_TODO)
-export const removeTodo = createAction(REMOVE_TODO)
-export const showLoader = createAction(SHOW_LOADER, () => true)
-export const hideLoader = createAction(HIDE_LOADER, () => false)
+export const {
+  updateCurrent,
+  loadTodos,
+  addTodo,
+  replaceTodo,
+  removeTodo,
+  showLoader,
+  hideLoader,
+} = createActions(
+  {
+    [UPDATE_CURRENT]: fixCase,
+    [SHOW_LOADER]: () => true,
+    [HIDE_LOADER]: () => false,
+  },
+  [LOAD_TODOS].toString(),
+  [ADD_TODO].toString(),
+  [REPLACE_TODO].toString(),
+  [REMOVE_TODO].toString(),
+)
 
 export const fetchTodos = () => (dispatch) => {
   dispatch(showLoader())
