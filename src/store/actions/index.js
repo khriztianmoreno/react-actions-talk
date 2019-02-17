@@ -35,9 +35,9 @@ export const {
     [UPDATE_CURRENT]: fixCase,
     [SHOW_LOADER]: () => true,
     [HIDE_LOADER]: () => false,
+    [ADD_TODO]: [x => x, (_, name) => ({ name })],
   },
   [LOAD_TODOS].toString(),
-  [ADD_TODO].toString(),
   [REPLACE_TODO].toString(),
   [REMOVE_TODO].toString(),
 )
@@ -59,10 +59,15 @@ export const fetchTodos = () => (dispatch) => {
 export const saveTodo = name => (dispatch) => {
   dispatch(showLoader())
 
-  createTodo(name).then((res) => {
-    dispatch(addTodo(res))
-    dispatch(hideLoader())
-  })
+  createTodo(name)
+    .then((res) => {
+      dispatch(addTodo(res))
+      dispatch(hideLoader())
+    })
+    .catch((err) => {
+      dispatch(addTodo(err, name))
+      dispatch(hideLoader())
+    })
 }
 
 export const toggleTodo = id => (dispatch, getState) => {

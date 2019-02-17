@@ -21,13 +21,16 @@ const initState = {
 }
 
 const reducer = handleActions({
-  [ADD_TODO]: (state, action) => (
-    {
-      ...state,
-      currentTodo: '',
-      todos: state.todos.concat(action.payload),
-    }
-  ),
+  [ADD_TODO]: {
+    next: (state, action) => (
+      {
+        ...state,
+        currentTodo: '',
+        todos: state.todos.concat(action.payload),
+      }
+    ),
+    throw: (state, action) => ({ ...state, message: `There was a problem saving the todo ${action.meta.name}` }),
+  },
   [LOAD_TODOS]: {
     next: (state, action) => ({ ...state, todos: action.payload }),
     throw: (state, action) => ({ ...state, message: action.payload.message }),

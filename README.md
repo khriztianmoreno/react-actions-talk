@@ -608,3 +608,132 @@ Al igual que antes, extendí el estado existente. Ahora, lo que quiero hacer es 
 
 Guardarémos esto. Regresamos al navegador y esta vez cuando se vuelva a cargar, obtendremos nuestro error, pero nuestro indicador está oculto y nuestro mensaje se muestra con el texto que dimos en ese error.
 
+### Add Meta Data to a Redux Action with redux-actions
+
+En la ultima parte de nuestro proyecto, agregaremos metadatos a una acción de redux usando el argumento opcional de la función metaCreator para `createAction`. Adjuntar metadatos a una acción nos permite pasar información que no forma parte de nuestra carga útil a nuestro reductor. En este caso, utilizaremos la meta propiedad en nuestra acción para mostrar un mensaje de error con información específica de la acción.
+
+Voy a simular un error mientras guardo una nueva tarea, para este parte vamos a repetir el procedimiento del punto aterior en `/lib/todoServices.js` pero ahora en la función `createTodo`.
+
+```js
+export const createTodo = (name) => {
+  return fetch(baseUrl, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, isComplete: false }),
+  }).
+  then(res => res.json())
+  .then(() => {
+    throw new Error('Boom!')
+  })
+}
+```
+
+Ahora en `/store/actions/index.js` vamos a capturar esta excepción en la función `saveTodo`
+
+```js
+export const saveTodo = name => (dispatch) => {
+  dispatch(showLoader())
+
+  createTodo(name)
+    .then((res) => {
+      dispatch(addTodo(res))
+      dispatch(hideLoader())
+    })
+    .catch((err) => {
+      dispatch(addTodo(err))
+      dispatch(hideLoader())
+    })
+}
+```
+
+Y por ultimo ajustaremos nuestra función reductora `ADD_TODO` en `/store/reducers/index.js` para que tenga un objeto con las keys `next` y `throw`
+
+```js
+[ADD_TODO]: {
+  next: (state, action) => (
+    {
+      ...state,
+      currentTodo: '',
+      todos: state.todos.concat(action.payload),
+    }
+  ),
+  throw: (state, action) => ({ ...state, message: 'There was a problem saving the todo' }),
+},
+```
+
+Me gustaría hacer este mensaje de error un poco más específico. Voy a ir hasta a donde estamos capturando y enviando la acción con el objeto de error y voy a pasar un segundo argumento que será el nombre que se pasa en `saveTodo` originalmente.
+
+```js
+export const saveTodo = name => {
+  return dispatch => {
+    dispatch(showLoader())
+    createTodo(name)
+      .then(res => {
+        dispatch(addTodo(res))
+        dispatch(hideLoader())
+      })
+      .catch(err => {
+        dispatch(addTodo(err, name))
+        dispatch(hideLoader())
+      })
+  }
+}
+```
+Ahora tal como está, *addTodo* tomará el error y tendrá un **payload**. Necesitamos una forma de incluir esta propiedad `name` en el reductor para poder usarlo como parte de ese mensaje. Aquí es donde la meta propiedad de un objeto *flux standard action * entra en juego.
+
+Nuestro creador de acción `addTodo` nos da la posibilidad de tomar este valor y ponerlo en una propiedad de metadatos en esa acción.
+
+Ahora, normalmente en el mapa de acción, estos tipos de acción se asignan a la función de creador del *payload* pero también tenemos una función de creador de metadatos que también podemos pasar. En realidad, voy a pasar una array y esto va a ser dos funciones.
+
+En `/store/actions/index.js` vamos a comentar la acción de identidad `ADD_TODO` y debajo de `HIDE_LOADER` vamos agregarla nuevamente pero ahora sera una propiedad que recibe un array de dos funciones.
+
+```js
+export const {
+  updateCurrent,
+  loadTodos,
+  addTodo,
+  replaceTodo,
+  removeTodo,
+  showLoader,
+  hideLoader,
+} = createActions(
+  {
+    [UPDATE_CURRENT]: fixCase,
+    [SHOW_LOADER]: () => true,
+    [HIDE_LOADER]: () => false,
+    [ADD_TODO]: [x => x, (pay, name) => ({ name })],
+  },
+  [LOAD_TODOS].toString(),
+  // [ADD_TODO].toString(),
+  [REPLACE_TODO].toString(),
+  [REMOVE_TODO].toString(),
+)
+```
+El primero parametro del array es para el creador *payload*. Realmente no quiero cambiar eso, solo voy a usar una función de identidad simple aquí. El segundo va a ser para mis metadatos. Esto tomará dos argumentos, tomará el valor que se está pasando para usar el `payload` y también va a tomar ese segundo argumento que en este caso es `name`. Entonces, quiero devolver un objeto con estos metadatos. Como no quiero tener en cuenta mi *payload* voy a cambiarlo con un `_` y voy a devolver un objecto `{ name: name }`
+
+```js
+[ADD_TODO]: [x => x, (_, name) => ({ name })],
+```
+
+Ahora que vamos a tenerlo disponible, actualicemos nuestro mensaje de error. En este caso, vamos a acceder a eso a través de `action.meta.name`.
+
+```js
+const reducer = handleActions({
+  [ADD_TODO]: {
+    next: (state, action) => (
+      {
+        ...state,
+        currentTodo: '',
+        todos: state.todos.concat(action.payload),
+      }
+    ),
+    throw: (state, action) => ({ ...state, message: `There was a problem saving the todo ${action.meta.name}` }),
+  },
+}, initState)
+```
+Vamos a guardar esto. Volveremos a cargar nuestra aplicación en el navegador. Esta vez, cuando intentemos agregar una nueva tarea, veremos que esta vez es parte de nuestro mensaje de error.
+
+Eso se agregó realmente a nuestros metadatos en nuestro objeto de acción, que podemos verlo en las herramientas de desarrollo de Redux.
