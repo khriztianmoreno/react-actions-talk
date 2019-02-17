@@ -468,26 +468,89 @@ const loaderReducer = handleAction(
 )
 ```
 
+### Create a Reducer Function for Multiple Redux Actions using redux-actions
 
-### `npm start`
+Estamos utilizando la biblioteca de `reduce-reducers` para tomar estos reductores individuales que hemos creado con la acción de manejar y combinarlos en un solo reductor. Esta es una necesidad bastante común. En esta punto, usaremos la función `handleActions` proporcionada por `redux-actions` para crear un reductor que manejará múltiples acciones, usando un reducerMap.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```js
+import { handleActions } from 'redux-actions'
+```
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+Voy a crear una funcion llamada `reducers` que hará un llamado a `handleActions`; *handleActions* tomará un objeto como su primer argumento. Este objeto es un *reducerMap*. En este reducerMap se van a asignar los tipos de acción a funciones reductoras. Después del objeto *reducerMap*, el segundo argumento para manejar las acciones es ese valor `initState`.
 
-### `npm test`
+```js
+const reducer = handleActions({
+  [ADD_TODO]: (state, action) => (
+    {
+      ...state,
+      currentTodo: '',
+      todos: state.todos.concat(action.payload)
+    }
+  ),
+}, initState)
+```
+Despues de refactorizar todos nuestros reducers tendremos un codigo como el siguiente:
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```js
+const reducer = handleActions({
+  [ADD_TODO]: (state, action) => (
+    {
+      ...state,
+      currentTodo: '',
+      todos: state.todos.concat(action.payload)
+    }
+  ),
+  [LOAD_TODOS]: (state, action) => ({ ...state, todos: action.payload }),
+  [UPDATE_CURRENT]: (state, action) => ({ ...state, currentTodo: action.payload }),
+  [REPLACE_TODO]: (state, action) => (
+    {
+      ...state,
+      todos: state.todos.map(t => (t.id === action.payload.id ? action.payload : t)),
+    }
+  ),
+  [REMOVE_TODO]: (state, action) => (
+    {
+      ...state,
+      todos: state.todos.filter(t => t.id !== action.payload),
+    }
+  ),
+}, initState)
+```
 
-### `npm run build`
+Luego de esto nos podemos preguntar, ¿Como incluir aquí nuestro reduce combinado? la respuesta es simple:
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```js
+[combineActions(SHOW_LOADER, HIDE_LOADER)]: (state, action) => ({ ...state, isLoading: action.payload })
+```
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+*Codigo final*
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```js
+const reducer = handleActions({
+  [ADD_TODO]: (state, action) => (
+    {
+      ...state,
+      currentTodo: '',
+      todos: state.todos.concat(action.payload)
+    }
+  ),
+  [LOAD_TODOS]: (state, action) => ({ ...state, todos: action.payload }),
+  [UPDATE_CURRENT]: (state, action) => ({ ...state, currentTodo: action.payload }),
+  [REPLACE_TODO]: (state, action) => (
+    {
+      ...state,
+      todos: state.todos.map(t => (t.id === action.payload.id ? action.payload : t)),
+    }
+  ),
+  [REMOVE_TODO]: (state, action) => (
+    {
+      ...state,
+      todos: state.todos.filter(t => t.id !== action.payload),
+    }
+  ),
+  [combineActions(SHOW_LOADER, HIDE_LOADER)]:
+    (state, action) => ({ ...state, isLoading: action.payload }),
+}, initState)
+
+export default reducer
+```
