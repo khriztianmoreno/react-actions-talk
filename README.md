@@ -17,6 +17,32 @@ Al utilizar redux-actions, nuestra aplicación utilizará [Flux Standard Actions
 
 Esta pequeña biblioteca solo expone algunas funciones para su API, por lo que no tardará mucho en aprender, pero hará una gran diferencia en cómo escribimos los *actions creators* y los *reducers* para redux.
 
+## Run
+
+En una terminal ejecutas el siguiente comando para levantar el servidor dummy:
+
+```bash
+$ npm run dev-server
+```
+
+Y en otra ventana de tu terminal levantamos nuestro proyecto web:
+
+```bash
+$ npm run dev
+```
+
+### Temas
+- [Add redux-actions as a Dependency of a React and Redux App](#add-redux-actions-as-a-dependency-of-a-react-and-redux-app)
+- [Refactor a Redux Action Creator using the createAction function from redux-actions](#refactor-a-redux-action-creator-using-the-createaction-function-from-redux-actions)
+- [Modify a Redux Action’s Payload upon Creation with redux-actions](#modify-a-redux-actions-payload-upon-creation-with-redux-actions)
+- [Create Multiple Redux Actions with an Action Map in redux-actions](#create-multiple-redux-actions-with-an-action-map-in-redux-actions)
+- [Create a Reducer Function for a Specific Redux Action using redux-actions](#create-a-reducer-function-for-a-specific-redux-action-using-redux-actions)
+- [Combine Individual Reducer Functions into a Single Reducer with reduce-reducers](#combine-individual-reducer-functions-into-a-single-reducer-with-reduce-reducers)
+- [Handle Multiple Actions using a Single Function with combineActions in redux-actions](#handle-multiple-actions-using-a-single-function-with-combineactions-in-redux-actions)
+- [Create a Reducer Function for Multiple Redux Actions using redux-actions](#create-a-reducer-function-for-multiple-redux-actions-using-redux-actions)
+- [Handle Error Conditions in a Reducer using redux-actions](#handle-error-conditions-in-a-reducer-using-redux-actions)
+- [Add Meta Data to a Redux Action with redux-actions](#add-meta-data-to-a-redux-action-with-redux-actions)
+
 ### Add redux-actions as a Dependency of a React and Redux App
 
 Lo primero que vamos a hacer es revisar la aplicación React y Redux con la que trabajaremos e instalaremos redux-actions como una dependencia de proyecto usando npm.
@@ -77,7 +103,6 @@ export const removeTodo = createAction(REMOVE_TODO)
 export const showLoader = () => ({ type: SHOW_LOADER, payload: true })
 export const hideLoader = () => ({ type: HIDE_LOADER, payload: false })
 ```
-
 ### Modify a Redux Action’s Payload upon Creation with redux-actions
 
 Ahora, usaremos el argumento opcional *payloadCreator* de la función `createAction` para para transformar la entrada de datos sin procesar para que estén correctamente formateados para nuestra aplicación.
@@ -102,7 +127,6 @@ const fixCase = str => `${str.slice(0, 1).toUpperCase()}${str.slice(1).toLowerCa
 
 export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
 ```
-
 ### Create Multiple Redux Actions with an Action Map in redux-actions
 
 En este paso, usaremos la función plural `createActions` y un mapa de acción para crear múltiples `action creator` con una sola utilidad a partir de redux actions.
@@ -217,7 +241,6 @@ export const {
   [REMOVE_TODO].toString(),
 )
 ```
-
 ### Create a Reducer Function for a Specific Redux Action using redux-actions
 
 Ahora usaremos la función `handleAction` proporcionada por `redux-actions` para crear una función reductora que manejará una acción específica. Luego, incorporaremos esta función reductora en el *reducer* existente y nos aseguraremos de que nuestra aplicación continúe funcionando.
@@ -274,7 +297,6 @@ export default (state = initState, action) => {
 ```
 
 Todo lo que hemos hecho aquí es tomar nuestra lógica del reductor y sacarlo de nuestra declaración de *case* del *switch* para limpiar nuestro código un poco. Todo sigue funcionando igual. Podemos verificar que al guardar esto todo sigue funcionando como se esperaba.
-
 ### Combine Individual Reducer Functions into a Single Reducer with reduce-reducers
 
 Ahora, agregaremos la biblioteca de `reduce-reducers` a nuestro proyecto y la utilizaremos junto con la función `handleAction` de `redux-actions` para definir funciones de reductoras separadas para cada acción y reducirlas a una única función con `reduce-reducers`.
@@ -400,7 +422,6 @@ export default reduceReducers(
   hideLoaderReducer,
 )
 ```
-
 ### Handle Multiple Actions using a Single Function with combineActions in redux-actions
 
 A veces, se pueden usar múltiples acciones para actualizar el estado usando la misma función. En esta punto, veremos cómo usar `combineActions` para manejar acciones separadas pero relacionadas en un solo controlador de acción.
@@ -467,7 +488,6 @@ const loaderReducer = handleAction(
   initState,
 )
 ```
-
 ### Create a Reducer Function for Multiple Redux Actions using redux-actions
 
 Estamos utilizando la biblioteca de `reduce-reducers` para tomar estos reductores individuales que hemos creado con la acción de manejar y combinarlos en un solo reductor. Esta es una necesidad bastante común. En esta punto, usaremos la función `handleActions` proporcionada por `redux-actions` para crear un reductor que manejará múltiples acciones, usando un reducerMap.
@@ -554,7 +574,6 @@ const reducer = handleActions({
 
 export default reducer
 ```
-
 ### Handle Error Conditions in a Reducer using redux-actions
 
 En esta punto, veremos cómo podemos manejar las condiciones de éxito y error de forma independiente utilizando las propiedades `next` y `throw` en un `reducerMap` con `handleActions`.
@@ -607,7 +626,6 @@ Ese objeto tendrá dos keys propias, `next` y `throw`, donde `next` será nuestr
 Al igual que antes, extendí el estado existente. Ahora, lo que quiero hacer es establecer la propiedad del mensaje y esto mostrará un mensaje en la parte superior de nuestra página. Porque, sé que estoy dentro de este reductor de error entonces el *payload* va a ser un objeto de error. Voy a usar `action.payload`, que es mi objeto de error y voy a usar la propiedad de `message` de ese objeto de error para definir cuál debería ser el texto del mensaje. 
 
 Guardarémos esto. Regresamos al navegador y esta vez cuando se vuelva a cargar, obtendremos nuestro error, pero nuestro indicador está oculto y nuestro mensaje se muestra con el texto que dimos en ese error.
-
 ### Add Meta Data to a Redux Action with redux-actions
 
 En la ultima parte de nuestro proyecto, agregaremos metadatos a una acción de redux usando el argumento opcional de la función metaCreator para `createAction`. Adjuntar metadatos a una acción nos permite pasar información que no forma parte de nuestra carga útil a nuestro reductor. En este caso, utilizaremos la meta propiedad en nuestra acción para mostrar un mensaje de error con información específica de la acción.
@@ -737,3 +755,5 @@ const reducer = handleActions({
 Vamos a guardar esto. Volveremos a cargar nuestra aplicación en el navegador. Esta vez, cuando intentemos agregar una nueva tarea, veremos que esta vez es parte de nuestro mensaje de error.
 
 Eso se agregó realmente a nuestros metadatos en nuestro objeto de acción, que podemos verlo en las herramientas de desarrollo de Redux.
+
+Con esto terminamos, **¡Espero que esto haya sido útil y/o te haya hecho aprender algo nuevo!**
