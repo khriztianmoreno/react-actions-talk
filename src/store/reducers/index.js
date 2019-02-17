@@ -1,7 +1,7 @@
 /**
  * @author Cristian Moreno <khriztianmoreno@gmail.com>
  */
-import { handleAction } from 'redux-actions'
+import { handleAction, combineActions } from 'redux-actions'
 import reduceReducers from 'reduce-reducers'
 
 import {
@@ -67,14 +67,8 @@ const removeTodoReducer = handleAction(
   initState,
 )
 
-const showLoaderReducer = handleAction(
-  [SHOW_LOADER],
-  (state, action) => ({ ...state, isLoading: action.payload }),
-  initState,
-)
-
-const hideLoaderReducer = handleAction(
-  [HIDE_LOADER],
+const loaderReducer = handleAction(
+  combineActions(SHOW_LOADER, HIDE_LOADER), 
   (state, action) => ({ ...state, isLoading: action.payload }),
   initState,
 )
@@ -85,6 +79,5 @@ export default reduceReducers(
   updateCurrentReducer,
   replaceTodoReducer,
   removeTodoReducer,
-  showLoaderReducer,
-  hideLoaderReducer,
+  loaderReducer,
 )

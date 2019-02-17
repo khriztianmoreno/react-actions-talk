@@ -83,10 +83,9 @@ a {
 }
 
 .loader {
-  align: center;
   width:50px;
   left: 50%;
   margin-left:-25px;
-  top: 195px;
+  top: 105px;
   position:absolute;
 }

@@ -401,6 +401,74 @@ export default reduceReducers(
 )
 ```
 
+### Handle Multiple Actions using a Single Function with combineActions in redux-actions
+
+A veces, se pueden usar múltiples acciones para actualizar el estado usando la misma función. En esta punto, veremos cómo usar `combineActions` para manejar acciones separadas pero relacionadas en un solo controlador de acción.
+
+Si echamos un vistazo al reductor `SHOW_LOADER` y al reductor `HIDE_LOADER`, notaremos que están haciendo exactamente lo mismo. Podemos usar redux-actions para combinarlas en un solo reductor. Comencemos saltando a la parte superior de nuestro archivo y actualizando nuestra importación para obtener también la función de acciones combinadas desde redux-actions.
+
+```js
+import { combineActions } from 'redux-actions'
+```
+
+Vamos a comentar las acciones `showLoaderReducer` y `hideLoaderReducer` y crear un nuevo reductor en su lugar. Simplemente lo llamaremos el `loaderReducer`.
+
+```js
+// const loadTodosReducer = handleAction(
+//   [LOAD_TODOS],
+//   (state, action) => ({ ...state, todos: action.payload }),
+//   initState,
+// )
+
+// const updateCurrentReducer = handleAction(
+//   [UPDATE_CURRENT],
+//   (state, action) => ({ ...state, currentTodo: action.payload }),
+//   initState,
+// )
+
+const loaderAction = '?????'
+```
+
+Necesitamos crear un nuevo tipo de acción combinar nuestras dos acciones. Crearemos entonces a `loaderAction` con una llamada a `combineActions`, esto tomará `SHOW_LOADER` y `HIDE_LOADER` como sus argumentos.
+
+```js
+const loaderAction = combineActions(SHOW_LOADER, HIDE_LOADER)
+```
+
+Ahora crearemos una funcion `loaderReducer` que hará un llamado a `handleAction` y el primer argumento de esta sera la función anterior `loaderAction`. 
+
+```js
+const loaderReducer = handleAction(
+  loaderAction, 
+  (state, action) => ({ ...state, isLoading: action.payload }),
+  initState,
+)
+```
+
+Solo nos resta eliminar `removeTodoReducer` y `showLoaderReducer` de nuestro *export default* y agregar la nueva función `loaderReducer`:
+
+```js
+export default reduceReducers(
+  addTodoReducer,
+  loadTodosReducer,
+  updateCurrentReducer,
+  replaceTodoReducer,
+  removeTodoReducer,
+  loaderReducer,
+)
+```
+
+Si quisiéramos omitir el paso donde definimos esta nueva variable, honestamente podríamos simplemente tomar acciones combinadas, cortarlas desde allí, pegarlas como el primer argumento para manejar Acción. No hay necesidad de crear esa variable intermedia.
+
+```js
+const loaderReducer = handleAction(
+  combineActions(SHOW_LOADER, HIDE_LOADER),
+  (state, action) => ({ ...state, isLoading: action.payload }),
+  initState,
+)
+```
+
+
 ### `npm start`
 
 Runs the app in the development mode.<br>
