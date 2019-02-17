@@ -554,3 +554,57 @@ const reducer = handleActions({
 
 export default reducer
 ```
+
+### Handle Error Conditions in a Reducer using redux-actions
+
+En esta punto, veremos cómo podemos manejar las condiciones de éxito y error de forma independiente utilizando las propiedades `next` y `throw` en un `reducerMap` con `handleActions`.
+
+Actualmente, las funciones `reducer` que están en nuestro `reducerMap` solo manejan el camino feliz. Nada aquí explica una condición de error. Simulemos un error y veamos qué sucede con el reductor de `loadTodo` cuando nuestro servicio lanza una excepción. Para esto, voy hacer un cambio en el archivo de servicios `/lib/todoServices.js` para devolver una excepción.
+
+```js
+export const getTodos = () => {
+  return fetch(baseUrl).then(res => res.json())
+  .then(() => {
+    throw new Error('Boom!')
+  })
+}
+```
+Veremos que nuestro indicador de carga se prolongó un poco más de lo esperado y ahora tenemos este rechazo no manejado con nuestro error de *Boom!*.
+
+Ahora, volvamos a nuestro archivo `/store/actions/index.js` y vamos a revisar la función `fetchTodos`, esta función no controla la excepción con la función `catch`. Normalmente nosotros creariamos un nuevo *action creator* que agregaría otro paso a nuestro reductor y básicamente esto nos permitiría enviar una acción de error. En su lugar, lo que vamos a hacer a llamar a `loadTodos` como lo hicimos antes, pero esta vez vamos a pasar nuestro error. También vamos a enviar `hideLoader`, para que se esconda mejor.
+
+```js
+export const fetchTodos = () => (dispatch) => {
+  dispatch(showLoader())
+
+  getTodos()
+    .then((todos) => {
+      dispatch(loadTodos(todos))
+      dispatch(hideLoader())
+    })
+    .catch((err) => {
+      dispatch(loadTodos(err))
+      dispatch(hideLoader())
+    })
+}
+```
+
+Ahora, volvamos a nuestra función de `reducer` en `/store/reducers/index.js` y veamos cómo podemos hacer que esto funcione. En `LOAD_TODOS`, verás que esperamos que nuestro `payload` sea un array de *todos*. Eso funciona en nuestro camino feliz, pero con la forma en que acabamos de enviar esta acción, ahora estamos enviando un error.
+
+Obviamente, el error no va a funcionar en lugar de nuestro array de objetos de *Todo*. El formato de **flux standard action** que estamos usando para estos objetos de acción tiene una propiedad de **error** que es un indicador booleano. Si nuestro objeto `payload` es un error, nuestro *action cretator* establecerá ese indicador de error en verdadero y debido a que estamos usando `action-redux` para nuestros *action cretators*, esto se maneja automáticamente y no tenemos que hacer nada.
+
+Lo que debemos hacer es diferenciar cómo queremos manejar nuestro reduce en función de si se trata de un objeto de error o no. Lo que vamos a hacer es que, en lugar de utilizar la función reductora como nuestro valor para esta clave `LOAD_TODOS`, le pasaremos un objeto.
+
+Ese objeto tendrá dos keys propias, `next` y `throw`, donde `next` será nuestra función reductora y `throw` es una función reductora, pero esta es la que llamamos si nuestro `payload` es un error y la clave de error en esa acción se establece en true.
+
+```js
+[LOAD_TODOS]: {
+  next: (state, action) => ({ ...state, todos: action.payload }),
+  throw: (state, action) => ({ ...state, message: action.payload.message }),
+},
+```
+
+Al igual que antes, extendí el estado existente. Ahora, lo que quiero hacer es establecer la propiedad del mensaje y esto mostrará un mensaje en la parte superior de nuestra página. Porque, sé que estoy dentro de este reductor de error entonces el *payload* va a ser un objeto de error. Voy a usar `action.payload`, que es mi objeto de error y voy a usar la propiedad de `message` de ese objeto de error para definir cuál debería ser el texto del mensaje. 
+
+Guardarémos esto. Regresamos al navegador y esta vez cuando se vuelva a cargar, obtendremos nuestro error, pero nuestro indicador está oculto y nuestro mensaje se muestra con el texto que dimos en ese error.
+

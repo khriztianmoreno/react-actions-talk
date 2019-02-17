@@ -45,10 +45,15 @@ export const {
 export const fetchTodos = () => (dispatch) => {
   dispatch(showLoader())
 
-  getTodos().then((todos) => {
-    dispatch(loadTodos(todos))
-    dispatch(hideLoader())
-  })
+  getTodos()
+    .then((todos) => {
+      dispatch(loadTodos(todos))
+      dispatch(hideLoader())
+    })
+    .catch((err) => {
+      dispatch(loadTodos(err))
+      dispatch(hideLoader())
+    })
 }
 
 export const saveTodo = name => (dispatch) => {

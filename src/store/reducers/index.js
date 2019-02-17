@@ -25,10 +25,13 @@ const reducer = handleActions({
     {
       ...state,
       currentTodo: '',
-      todos: state.todos.concat(action.payload)
+      todos: state.todos.concat(action.payload),
     }
   ),
-  [LOAD_TODOS]: (state, action) => ({ ...state, todos: action.payload }),
+  [LOAD_TODOS]: {
+    next: (state, action) => ({ ...state, todos: action.payload }),
+    throw: (state, action) => ({ ...state, message: action.payload.message }),
+  },
   [UPDATE_CURRENT]: (state, action) => ({ ...state, currentTodo: action.payload }),
   [REPLACE_TODO]: (state, action) => (
     {
