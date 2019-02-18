@@ -17,34 +17,16 @@ Al utilizar redux-actions, nuestra aplicación utilizará [Flux Standard Actions
 
 Esta pequeña biblioteca solo expone algunas funciones para su API, por lo que no tardará mucho en aprender, pero hará una gran diferencia en cómo escribimos los *actions creators* y los *reducers* para redux.
 
-### Add redux-actions as a Dependency of a React and Redux App
+## Run
 
-En esta primera parte, revisaremos la aplicación React y Redux con la que trabajaremos e instalaremos redux-actions como una dependencia de proyecto usando npm.
+En una terminal ejecutas el siguiente comando para levantar el servidor dummy:
 
 ```bash
-# We need to install that as dependency for our project
-$ npm i -S redux-actions
+$ npm run dev-server
 ```
 
-### `npm start`
+Y en otra ventana de tu terminal levantamos nuestro proyecto web:
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+$ npm run dev
+```
