@@ -142,17 +142,27 @@ import { createActions } from 'redux-actions'
 Agregaré una llamada a `createActions` y crearé acciones, tomará un objeto como su primer argumento y este objeto es un mapa de acciónes. En el mapa de acción, voy a usar mis tipos de acción como claves.
 
 ```js
-createActions(
+const actionCreators = createActions(
   {
-  UPDATE_CURRENT: fixCase,
-  SHOW_LOADER: () => true,
-  HIDE_LOADER: () => false
+    [UPDATE_CURRENT]: fixCase,
+    [SHOW_LOADER]: () => true,
+    [HIDE_LOADER]: () => false,
   },
   LOAD_TODOS,
   ADD_TODO,
   REPLACE_TODO,
   REMOVE_TODO,
 )
+
+export const {
+  updateCurrent,
+  loadTodos,
+  addTodo,
+  replaceTodo,
+  removeTodo,
+  showLoader,
+  hideLoader,
+} = actionCreators
 
 // export const updateCurrent = createAction(UPDATE_CURRENT, fixCase)
 // export const loadTodos = createAction(LOAD_TODOS)
