@@ -43,6 +43,7 @@ class TodoList extends Component {
 
   render() {
     const { todos = [], onToggleTodo, onDeleteTodo } = this.props
+
     return (
       <div className="Todo-List">
         <ul>
@@ -73,15 +74,23 @@ TodoItem.propTypes = {
   onDeleteTodo: PropTypes.func.isRequired,
 }
 
+TodoList.defaultProps = {
+  todos: {},
+}
+
 /**
  * Typechecking props
  */
 TodoList.propTypes = {
-  todos: PropTypes.arrayOf({
-    id: PropTypes.number,
-    name: PropTypes.string,
-    isComplete: PropTypes.bool,
-  }).isRequired,
+  todos: PropTypes.arrayOf(
+    PropTypes.shape(
+      {
+        id: PropTypes.number,
+        name: PropTypes.string,
+        isComplete: PropTypes.bool,
+      },
+    ),
+  ),
   getTodos: PropTypes.func.isRequired,
   onToggleTodo: PropTypes.func.isRequired,
   onDeleteTodo: PropTypes.func.isRequired,
